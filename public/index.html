@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="si">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#111827">
+  <title>Gemini Transcribe Sinhala</title>
+  <style>
+    :root { color-scheme: dark; --bg:#0b1020; --panel:#141b2d; --line:#29344d; --text:#f3f6ff; --muted:#aab5cc; --accent:#9b8cff; --accent2:#6fe0c0; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:radial-gradient(ellipse at top,#202b4a 0,#0b1020 48%); color:var(--text); min-height:100vh; }
+    main { max-width:850px; margin:0 auto; padding:24px 15px 50px; }
+    header { padding:12px 4px 22px; }
+    .eyebrow { color:var(--accent2); font-size:.78rem; letter-spacing:.12em; font-weight:800; text-transform:uppercase; }
+    h1 { font-size:clamp(1.8rem,7vw,2.6rem); line-height:1.12; margin:10px 0; }
+    p { color:var(--muted); line-height:1.55; }
+    .panel { background:rgba(20,27,45,.95); border:1px solid var(--line); border-radius:20px; padding:17px; margin:14px 0; box-shadow:0 12px 35px #0002; }
+    .drop { border:1.5px dashed #586585; border-radius:15px; padding:20px 12px; text-align:center; background:#0c1324; }
+    input[type=file] { width:100%; max-width:100%; margin:12px 0 6px; color:var(--muted); }
+    button { border:0; border-radius:13px; padding:13px 15px; min-height:46px; font-weight:750; font-size:1rem; cursor:pointer; }
+    button:disabled { opacity:.45; cursor:not-allowed; }
+    .primary { background:var(--accent); color:#101027; width:100%; margin-top:12px; }
+    .secondary { background:#242e47; color:var(--text); border:1px solid #3a4764; }
+    .actions { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:12px; }
+    .actions button { font-size:.9rem; }
+    .hint { font-size:.84rem; }
+    .status { padding:12px; border-radius:12px; background:#0c1324; color:var(--muted); margin-top:12px; overflow-wrap:anywhere; }
+    .status.error { color:#ffb9c1; border:1px solid #85404b; }
+    .status.ok { color:#9ff3d9; border:1px solid #2d7969; }
+    .resultHead { display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+    h2 { font-size:1.1rem; margin:0 0 12px; }
+    label { font-weight:700; display:block; margin-bottom:8px; }
+    textarea { width:100%; min-height:180px; border-radius:12px; padding:13px; background:#0a1020; color:var(--text); border:1px solid #33405d; resize:vertical; line-height:1.6; font:inherit; }
+    .small { font-size:.8rem; }
+    .hidden { display:none; }
+    .pill { font-size:.78rem; border-radius:99px; padding:5px 9px; background:#24324b; color:var(--accent2); }
+    footer { color:#8f9bb4; font-size:.8rem; line-height:1.5; padding:8px 4px; }
+    @media(min-width:650px) { main { padding-top:36px; } .panel { padding:22px; } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="eyebrow">AI AUDIO WORKSPACE</div>
+    <h1>Gemini Transcribe<br><span style="color:var(--accent)">Sinhala</span></h1>
+    <p>Audio එක transcript කරන්න, සිංහලට පරිවර්තනය කරන්න, TXT සහ SRT ලෙස export කරන්න.</p>
+  </header>
+
+  <section class="panel">
+    <h2>1. Audio file එක තෝරන්න</h2>
+    <div class="drop">
+      <div style="font-size:2rem">🎧</div>
+      <strong>Audio upload කරන්න</strong>
+      <p class="hint">MP3, WAV, M4A, AAC, OGG, FLAC, WEBM · උපරිම 3 MB</p>
+      <input id="audio" type="file" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.flac,.webm,.amr">
+      <div id="fileInfo" class="hint">තවම file එකක් තෝරා නැහැ.</div>
+    </div>
+    <button id="start" class="primary">Transcribe + Sinhala Translate</button>
+    <div id="status" class="status" role="status" aria-live="polite">Audio file එකක් තෝරා පටන් ගන්න.</div>
+  </section>
+
+  <section id="results" class="hidden">
+    <section class="panel">
+      <div class="resultHead"><h2>2. Original transcript</h2><span id="language" class="pill"></span></div>
+      <textarea id="transcript" spellcheck="false" aria-label="Original transcript"></textarea>
+      <div class="actions">
+        <button class="secondary" data-download="transcript" data-name="transcript.txt">Download TXT</button>
+        <button class="secondary" data-download="originalSrt" data-name="subtitles-original.srt">Download SRT</button>
+      </div>
+    </section>
+    <section class="panel">
+      <h2>3. සිංහල පරිවර්තනය</h2>
+      <textarea id="translation" spellcheck="false" aria-label="Sinhala translation"></textarea>
+      <div class="actions">
+        <button class="secondary" data-download="translation" data-name="translation-si.txt">Download TXT</button>
+        <button class="secondary" data-download="sinhalaSrt" data-name="subtitles-si.srt">Download Sinhala SRT</button>
+      </div>
+      <p class="small">SRT file එක subtitle player එකක භාවිත කරන්න පුළුවන්. පරිවර්තනය සහ timestamps වැරදි තිබේදැයි export කිරීමට පෙර පරීක්ෂා කරන්න.</p>
+    </section>
+  </section>
+  <footer>
+    <strong>සීමාව:</strong> Vercel serverless upload limit නිසා මේ starter version එක 3 MB දක්වා කෙටි audio clips සඳහායි. දිගු audio/episodes සඳහා direct cloud upload සහ chunking support එකක් අවශ්‍යයි. API key එක browser එකට යවන්නේ නැහැ; server-side environment variable එකක් ලෙස පමණක් භාවිත කරනවා.
+  </footer>
+</main>
+<script>
+  const fileInput = document.getElementById('audio');
+  const startBtn = document.getElementById('start');
+  const statusEl = document.getElementById('status');
+  const fileInfo = document.getElementById('fileInfo');
+  const results = document.getElementById('results');
+  let current = null;
+
+  fileInput.addEventListener('change', () => {
+    const file = fileInput.files?.[0];
+    current = null;
+    results.classList.add('hidden');
+    if (!file) { fileInfo.textContent = 'තවම file එකක් තෝරා නැහැ.'; return; }
+    fileInfo.textContent = `${file.name} · ${(file.size / 1024 / 1024).toFixed(2)} MB`;
+    if (file.size > 3 * 1024 * 1024) {
+      setStatus('File එක 3 MB ට වඩා වැඩියි. කෙටි clip එකක් තෝරන්න.', true);
+    } else {
+      setStatus('File එක සූදානම්. Transcribe බොත්තම ඔබන්න.');
+    }
+  });
+
+  function setStatus(message, error=false, ok=false) {
+    statusEl.textContent = message;
+    statusEl.className = 'status' + (error ? ' error' : '') + (ok ? ' ok' : '');
+  }
+
+  startBtn.addEventListener('click', async () => {
+    const file = fileInput.files?.[0];
+    if (!file) return setStatus('මුලින් audio file එකක් තෝරන්න.', true);
+    if (file.size > 3 * 1024 * 1024) return setStatus('Vercel version එකේ file එක 3 MB ට වඩා කුඩා විය යුතුයි.', true);
+    startBtn.disabled = true;
+    startBtn.textContent = 'Processing…';
+    setStatus('Audio එක යවමින් සහ transcript/translation සකස් කරමින්…');
+    results.classList.add('hidden');
+    try {
+      const body = new FormData();
+      body.append('audio', file);
+      const response = await fetch('/api/transcribe', { method: 'POST', body });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`);
+      current = data;
+      document.getElementById('transcript').value = data.transcript || '';
+      document.getElementById('translation').value = data.translation || '';
+      document.getElementById('language').textContent = `Language: ${data.language || 'Unknown'}`;
+      results.classList.remove('hidden');
+      setStatus('සාර්ථකයි! පහළින් TXT හෝ SRT download කරන්න.', false, true);
+    } catch (err) {
+      setStatus(err.message || 'දෝෂයක් ඇති වුණා. නැවත උත්සාහ කරන්න.', true);
+    } finally {
+      startBtn.disabled = false;
+      startBtn.textContent = 'Transcribe + Sinhala Translate';
+    }
+  });
+
+  function downloadText(text, name) {
+    const blob = new Blob([text || ''], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  document.querySelectorAll('[data-download]').forEach(button => {
+    button.addEventListener('click', () => {
+      if (!current) return;
+      const key = button.dataset.download;
+      let value = current[key] || '';
+      if (key === 'transcript') value = document.getElementById('transcript').value;
+      if (key === 'translation') value = document.getElementById('translation').value;
+      downloadText(value, button.dataset.name);
+    });
+  });
+</script>
+</body>
+</html>
